@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriMonitor</title>
+<style>
+  :root {
+    --primary: #2D6A4F;
+    --primary-light: #52B788;
+    --primary-lighter: #D8F3DC;
+    --accent: #B7E4C7;
+    --bg: #F8FBF8;
+    --surface: #ffffff;
+    --border: #D8E8D8;
+    --text: #1B2E1B;
+    --text-muted: #5A7A5A;
+    --danger: #C0392B;
+    --danger-light: #FDEDEB;
+    --warning: #E67E22;
+    --warning-light: #FEF5E7;
+    --info: #1A6B8A;
+    --info-light: #EAF4F8;
+    --radius: 10px;
+    --shadow: 0 2px 8px rgba(45,106,79,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; min-height: 100vh; }
+  
+  /* NAV */
+  .nav { background: var(--primary); padding: 0; display: flex; align-items: stretch; border-bottom: 2px solid var(--primary-light); position: sticky; top: 0; z-index: 100; }
+  .nav-brand { color: white; font-size: 16px; font-weight: 700; padding: 0 20px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.3px; border-right: 1px solid rgba(255,255,255,0.15); }
+  .nav-brand span { color: var(--primary-light); }
+  .nav-tabs { display: flex; flex: 1; overflow-x: auto; }
+  .nav-tab { color: rgba(255,255,255,0.7); padding: 14px 18px; cursor: pointer; font-size: 13px; font-weight: 500; border-bottom: 3px solid transparent; white-space: nowrap; transition: all 0.2s; user-select: none; display: flex; align-items: center; gap: 6px; }
+  .nav-tab:hover { color: white; background: rgba(255,255,255,0.05); }
+  .nav-tab.active { color: white; border-bottom-color: var(--primary-light); background: rgba(255,255,255,0.1); }
+  .nav-tab.disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* MAIN */
+  .main { max-width: 960px; margin: 0 auto; padding: 24px 20px 60px; }
+  
+  /* SECTIONS */
+  .section { margin-bottom: 28px; }
+  .section-title { font-size: 13px; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1.5px solid var(--primary-lighter); display: flex; align-items: center; gap: 8px; }
+  .guide { background: var(--info-light); border-left: 3px solid var(--info); border-radius: 0 var(--radius) var(--radius) 0; padding: 10px 14px; font-size: 13px; color: var(--info); margin-bottom: 18px; }
+  
+  /* CARDS */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+  .card + .card { margin-top: 16px; }
+  .frame { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: #FAFCFA; margin-bottom: 16px; }
+  .frame-title { font-size: 12px; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  
+  /* FORMS */
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+  .field label .req { color: var(--danger); }
+  .field input, .field select { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; color: var(--text); background: white; transition: border-color 0.2s; outline: none; }
+  .field input:focus, .field select:focus { border-color: var(--primary-light); box-shadow: 0 0 0 2px rgba(82,183,136,0.15); }
+  .field input.error { border-color: var(--danger); }
+  .checkbox-field { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: var(--text); user-select: none; }
+  .checkbox-field input[type=checkbox] { width: 10px; height: 10px; accent-color: var(--primary); cursor: pointer; }
+  
+  /* BUTTONS */
+  .btn { padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
+  .btn-primary:hover { background: #245A42; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+  .btn-outline { background: white; color: var(--primary); border-color: var(--border); }
+  .btn-outline:hover { border-color: var(--primary); background: var(--primary-lighter); }
+  .btn-danger { background: var(--danger); color: white; border-color: var(--danger); }
+  .btn-danger:hover { background: #A93226; }
+  .btn-danger-outline { background: white; color: var(--danger); border-color: #F1948A; }
+  .btn-danger-outline:hover { background: var(--danger-light); }
+  .btn-ai { background: linear-gradient(135deg, #2D6A4F, #1A6B8A); color: white; border: none; padding: 12px 24px; font-size: 14px; font-weight: 600; border-radius: var(--radius); width: 100%; justify-content: center; }
+  .btn-ai:hover { opacity: 0.9; transform: translateY(-1px); }
+  
+  /* TABLES */
+  .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { background: var(--primary-lighter); color: var(--primary); font-weight: 600; padding: 10px 12px; text-align: left; white-space: nowrap; }
+  tbody td { padding: 9px 12px; border-top: 1px solid #F0F5F0; vertical-align: middle; }
+  tbody tr:hover { background: #F5FAF5; }
+  
+  /* LIST ITEMS */
+  .list-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-bottom: 1px solid #F0F5F0; }
+  .list-item:last-child { border-bottom: none; }
+  .list-item span { flex: 1; font-size: 13px; }
+  
+  /* SUMMARY CARDS */
+  .summary-card { background: var(--primary-lighter); border: 1px solid var(--accent); border-radius: var(--radius); padding: 14px 18px; }
+  .summary-card.warning { background: var(--warning-light); border-color: #FAD7A0; }
+  .summary-card.info { background: var(--info-light); border-color: #AED6F1; }
+  .summary-stat { display: flex; flex-direction: column; }
+  .summary-stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .summary-stat-value { font-size: 24px; font-weight: 700; color: var(--primary); }
+  .summary-stat-value.secondary { font-size: 16px; }
+  
+  /* BADGE */
+  .badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-atletica { background: #D4EFDF; color: #1E8449; }
+  .badge-buono { background: #D5E8D4; color: #27AE60; }
+  .badge-obesita { background: #FAD7A0; color: #E67E22; }
+  .badge-pericolo { background: var(--danger-light); color: var(--danger); }
+  .badge-normal { background: var(--primary-lighter); color: var(--primary); }
+  
+  /* ALERT */
+  .alert { padding: 12px 16px; border-radius: var(--radius); margin-bottom: 16px; font-size: 13px; }
+  .alert-warning { background: var(--warning-light); border: 1px solid #FAD7A0; color: #784212; }
+  .alert-success { background: #D5E8D4; border: 1px solid #A9DFBF; color: #1D5D2A; }
+  .alert-info { background: var(--info-light); border: 1px solid #AED6F1; color: var(--info); }
+  
+  /* DIET OUTPUT */
+  .diet-output { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-top: 16px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; max-height: 500px; overflow-y: auto; }
+  .prompt-preview { background: #F8F8F2; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; font-family: monospace; font-size: 12px; color: #444; white-space: pre-wrap; word-break: break-word; margin-bottom: 16px; max-height: 200px; overflow-y: auto; }
+  
+  /* TOOLBAR */
+  .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; box-shadow: var(--shadow); }
+  .stat-card-value { font-size: 26px; font-weight: 700; color: var(--primary); }
+  .stat-card-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; margin-top: 4px; }
+  
+  /* LOADING */
+  .loading { display: flex; align-items: center; gap: 10px; padding: 20px; color: var(--text-muted); font-size: 13px; }
+  .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  
+  /* TABS WITHIN */
+  .subtabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .subtab { padding: 8px 16px; cursor: pointer; font-size: 13px; color: var(--text-muted); border-bottom: 2px solid transparent; transition: all 0.2s; margin-bottom: -1px; }
+  .subtab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 500; }
+  .subtab:hover { color: var(--text); }
+
+  /* MACRO */
+  .macro-row { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .macro-label { font-size: 13px; color: var(--text); width: 100px; }
+  .macro-input { width: 70px; }
+  .macro-bar-bg { flex: 1; height: 8px; background: var(--border); border-radius: 4px; min-width: 80px; }
+  .macro-bar { height: 8px; border-radius: 4px; transition: width 0.3s; }
+  
+  /* CHART CANVAS */
+  .chart-container { position: relative; height: 200px; margin-top: 12px; }
+  
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+    .main { padding: 16px 12px 40px; }
+    .nav-brand { font-size: 14px; padding: 0 12px; }
+    .nav-tab { padding: 12px 12px; font-size: 12px; }
+  }
+  
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+  
+  .hidden { display: none !important; }
+  .flex-end { display: flex; justify-content: flex-end; margin-top: 12px; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  .mt-2 { margin-top: 8px; }
+  .mt-3 { margin-top: 12px; }
+  .mt-4 { margin-top: 16px; }
+  .gap-2 { gap: 8px; }
+  .text-muted { color: var(--text-muted); font-size: 12px; }
+  .text-danger { color: var(--danger); font-size: 12px; }
+  .big-text { font-size: 16px; line-height: 1.7; color: var(--text); }
+</style>
+</head>
+<body>
+
+<nav class="nav" role="navigation">
+  <div class="nav-brand">🥗 Nutri<span>Monitor</span></div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showTab('config')" id="tab-config">⚙️ Configurazione</div>
+    <div class="nav-tab disabled" onclick="showTab('monitor')" id="tab-monitor">📊 Monitoraggio</div>
+    <div class="nav-tab disabled" onclick="showTab('diet')" id="tab-diet">🥑 Piano Dieta</div>
+    <div class="nav-tab disabled" onclick="showTab('stats')" id="tab-stats">📈 Statistiche</div>
+  </div>
+</nav>
+
+<main class="main" role="main">
+
+<!-- ========== CONFIG TAB ========== -->
+<div id="page-config">
+  <div class="section">
+    <div class="section-title">⚙️ Configurazioni e Preferenze</div>
+    
+    <div class="card">
+      <div class="guide">Compila le informazioni necessarie che ti riguardano per il calcolo dei valori da monitorare</div>
+      
+      <div class="frame-title">a) Dati di riferimento</div>
+      <div class="form-grid-3">
+        <div class="field">
+          <label>Data di nascita <span class="req">*</span></label>
+          <input type="date" id="cfg-dob" max="" oninput="saveConfig()">
+        </div>
+        <div class="field">
+          <label>Sesso <span class="req">*</span></label>
+          <select id="cfg-sesso" onchange="saveConfig()">
+            <option value="">— seleziona —</option>
+            <option value="M">Maschio</option>
+            <option value="F">Femmina</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Altezza in centimetri <span class="req">*</span></label>
+          <input type="number" id="cfg-altezza" min="100" max="250" placeholder="es. 175" oninput="saveConfig()">
+        </div>
+      </div>
+      
+      <div id="cfg-save-msg" class="hidden alert alert-success mt-3">✅ Profilo salvato. Ora puoi accedere a tutte le funzionalità.</div>
+      <div id="cfg-incomplete-msg" class="hidden alert alert-warning mt-3">⚠️ Compila tutti i campi obbligatori (*) per sbloccare le altre sezioni.</div>
+      
+      <div class="flex-end mt-4">
+        <button class="btn btn-primary" onclick="saveConfigExplicit()">💾 Salva profilo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MONITOR TAB ========== -->
+<div id="page-monitor" class="hidden">
+  <div class="section">
+    <div class="section-title">📊 Monitoraggio</div>
+
+    <!-- Lista misurazioni -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="flex-between" style="margin-bottom:12px;">
+        <strong style="font-size:14px;">Le tue misurazioni</strong>
+        <button class="btn btn-danger-outline btn-sm" onclick="deleteSelectedMeasures()">🗑️ Elimina selezionati</button>
+      </div>
+      <div class="toolbar">
+        <label class="checkbox-field">
+          <input type="checkbox" id="chk-all-measures" onchange="toggleAllMeasures(this.checked)">
+          Seleziona tutto
+        </label>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Data</th>
+              <th>% Massa grassa</th>
+              <th>% Massa magra</th>
+              <th>Classificazione</th>
+              <th>Peso kg</th>
+              <th>Kcal/g fabb.</th>
+            </tr>
+          </thead>
+          <tbody id="measures-list"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Form inserimento -->
+    <div class="card">
+      <div class="frame-title">Inserimento / modifica misurazione</div>
+      
+      <div class="field" style="max-width:200px; margin-bottom:16px;">
+        <label>Data di verifica <span class="req">*</span></label>
+        <input type="date" id="m-data" onchange="loadMeasureForDate()" oninput="loadMeasureForDate()">
+      </div>
+      
+      <div class="frame">
+        <div class="frame-title">Circonferenze (cm)</div>
+        <div class="form-grid">
+          <div class="field"><label>Collo <span class="req">*</span></label><input type="number" step="0.1" id="m-collo" placeholder="es. 37.5"></div>
+          <div class="field"><label>Petto</label><input type="number" step="0.1" id="m-petto" placeholder="es. 95.0"></div>
+          <div class="field"><label>Vita (punto più stretto) <span class="req">*</span></label><input type="number" step="0.1" id="m-vita" placeholder="es. 80.0"></div>
+          <div class="field"><label>Fianchi (punto più largo) <span class="req">*</span></label><input type="number" step="0.1" id="m-fianchi" placeholder="es. 98.0"></div>
+          <div class="field"><label>Braccio (contratto)</label><input type="number" step="0.1" id="m-braccio" placeholder="es. 32.0"></div>
+          <div class="field"><label>Avambraccio</label><input type="number" step="0.1" id="m-avambraccio" placeholder="es. 27.0"></div>
+          <div class="field"><label>Coscia prossimale</label><input type="number" step="0.1" id="m-coscia" placeholder="es. 54.0"></div>
+          <div class="field"><label>Polpaccio</label><input type="number" step="0.1" id="m-polpaccio" placeholder="es. 37.0"></div>
+        </div>
+      </div>
+      
+      <div class="frame">
+        <div class="frame-title">Altri valori</div>
+        <div class="form-grid">
+          <div class="field"><label>Peso kg <span class="req">*</span></label><input type="number" step="0.1" id="m-peso" placeholder="es. 78.5"></div>
+          <div class="field"><label>Frequenza cardiaca a riposo (bpm)</label><input type="number" id="m-fc" placeholder="es. 62"></div>
+          <div class="field">
+            <label>Lavoro svolto <span class="req">*</span></label>
+            <select id="m-lavoro">
+              <option value="">— seleziona —</option>
+              <option value="1.25">Sedentario (1.25)</option>
+              <option value="1.35">Leggero (1.35)</option>
+              <option value="1.45">Medio (1.45)</option>
+              <option value="1.55">Pesante (1.55)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Ore settimanali di attività fisica <span class="req">*</span></label>
+            <select id="m-ore">
+              <option value="">— seleziona —</option>
+              <option value="0">Meno di 3 (0%)</option>
+              <option value="10">3 ore (10%)</option>
+              <option value="15">4 ore (15%)</option>
+              <option value="20">5 ore (20%)</option>
+              <option value="25">6 ore (25%)</option>
+              <option value="30">7 ore (30%)</option>
+              <option value="35">8 ore (35%)</option>
+              <option value="40">9 ore (40%)</option>
+              <option value="45">10 ore (45%)</option>
+              <option value="50">11 ore (50%)</option>
+              <option value="60">12 ore (60%)</option>
+              <option value="70">13 ore (70%)</option>
+              <option value="80">14 ore (80%)</option>
+              <option value="90">15 ore (90%)</option>
+              <option value="100">Più di 15 ore (100%)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sezione riepilogo -->
+      <div class="frame" style="background: #F0F9F4; border-color: var(--primary-light);">
+        <div class="frame-title" style="color: var(--primary);">📋 Riepilogo calcolato</div>
+        <div id="summary-result">
+          <div class="text-muted">Compilare tutti i dati obbligatori per visualizzare il riepilogo.</div>
+        </div>
+        
+        <div class="mt-3" id="regime-section" style="display:none;">
+          <div class="field" style="max-width:300px;">
+            <label>Regime da seguire <span class="req">*</span></label>
+            <select id="m-regime" onchange="updateSummary()">
+              <option value="">— seleziona —</option>
+              <option value="0.05">Surplus minimo (+5%)</option>
+              <option value="0.10">Surplus medio (+10%)</option>
+              <option value="0.20">Surplus massimo (+20%)</option>
+              <option value="0">Nel fabbisogno calorico (0%)</option>
+              <option value="-0.05">Deficit minimo (-5%)</option>
+              <option value="-0.10">Deficit medio (-10%)</option>
+              <option value="-0.25">Deficit massimo (-25%)</option>
+            </select>
+          </div>
+          <div id="calories-result" class="mt-2"></div>
+        </div>
+      </div>
+      
+      <div class="flex-end mt-4" style="gap:10px;">
+        <button class="btn btn-outline" onclick="clearMeasureForm()">↩ Pulisci</button>
+        <button class="btn btn-primary" onclick="saveMeasure()">💾 Salva misurazione</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== DIET TAB ========== -->
+<div id="page-diet" class="hidden">
+  <div class="section">
+    <div class="section-title">🥑 Piano Dieta</div>
+    
+    <!-- Struttura dieta -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="section-title" style="font-size:12px;">a) Struttura della dieta</div>
+      <div class="guide">Indica come dev'essere organizzata la dieta</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Numero di pasti giornalieri <span class="req">*</span></label>
+          <input type="number" id="d-pasti" min="1" max="10" placeholder="es. 5" value="">
+        </div>
+        <div class="field">
+          <label>Giorno di sgarro <span class="req">*</span></label>
+          <select id="d-sgarro">
+            <option value="nessuno">Nessuno</option>
+            <option value="Lunedì">Lunedì</option>
+            <option value="Martedì">Martedì</option>
+            <option value="Mercoledì">Mercoledì</option>
+            <option value="Giovedì">Giovedì</option>
+            <option value="Venerdì">Venerdì</option>
+            <option value="Sabato">Sabato</option>
+            <option value="Domenica">Domenica</option>
+          </select>
+        </div>
+        <div class="field" style="justify-content:flex-end; padding-top:18px;">
+          <label class="checkbox-field">
+            <input type="checkbox" id="d-spuntino">
+            Prevedi uno spuntino serale
+          </label>
+        </div>
+      </div>
+      
+      <div class="mt-3">
+        <div class="field">
+          <label>Tipo di dieta</label>
+          <div style="display:flex; flex-direction:column; gap:10px; margin-top:6px;">
+
+            <label class="checkbox-field" style="float:left">
+              <input type="radio" name="tipo-dieta" id="dieta-auto" value="auto" checked onchange="toggleDietType()" style="width:10px">
+              Parametri inseriti nel monitoraggio
+            </label>
+
+            <label class="checkbox-field">
+              <input type="radio" name="tipo-dieta" id="dieta-manual" value="manual" onchange="toggleDietType()" style="width:10px">
+              Percentuali di macronutrienti personalizzate
+            </label>
+          </div>
+
+        </div>
+        
+        <div id="macro-section" class="mt-3 hidden">
+          <div class="frame-title">Percentuale macronutrienti (totale = 100%)</div>
+          <div id="macro-total-check" class="text-danger hidden" style="margin-bottom:8px;">⚠️ La somma deve essere 100%</div>
+          <div class="macro-row">
+            <span class="macro-label">🌾 Carboidrati</span>
+            <input class="field macro-input" type="number" id="macro-carbo" value="40" min="0" max="100" oninput="updateMacroBars()">
+            <span style="font-size:12px; color:var(--text-muted);">%</span>
+            <div class="macro-bar-bg"><div class="macro-bar" id="bar-carbo" style="background:#F4A261; width:40%;"></div></div>
+          </div>
+          <div class="macro-row">
+            <span class="macro-label">🥩 Proteine</span>
+            <input class="field macro-input" type="number" id="macro-prot" value="30" min="0" max="100" oninput="updateMacroBars()">
+            <span style="font-size:12px; color:var(--text-muted);">%</span>
+            <div class="macro-bar-bg"><div class="macro-bar" id="bar-prot" style="background:#2D9CDB; width:30%;"></div></div>
+          </div>
+          <div class="macro-row">
+            <span class="macro-label">🧈 Grassi</span>
+            <input class="field macro-input" type="number" id="macro-grassi" value="30" min="0" max="100" oninput="updateMacroBars()">
+            <span style="font-size:12px; color:var(--text-muted);">%</span>
+            <div class="macro-bar-bg"><div class="macro-bar" id="bar-grassi" style="background:#6FCF97; width:30%;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Intolleranze -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="section-title" style="font-size:12px;">b) Intolleranze o allergie</div>
+      <div class="guide">Indica le sostanze o gli alimenti a cui sei allergico o intollerante (es. nichel, glutine... ecc.)</div>
+      <div class="toolbar">
+        <button class="btn btn-outline btn-sm" onclick="addListItem('intolleranze')">+ Aggiungi</button>
+        <label class="checkbox-field" style="font-size:12px;">
+          <input type="checkbox" id="chk-all-int" onchange="toggleAllList('intolleranze', this.checked)"> Seleziona tutto
+        </label>
+        <button class="btn btn-danger-outline btn-sm" onclick="deleteSelectedList('intolleranze')">🗑️ Elimina selezionati</button>
+      </div>
+      <div class="table-wrap">
+        <div id="intolleranze-list" style="min-height:40px;"></div>
+      </div>
+    </div>
+    
+    <!-- Alimenti da escludere -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="section-title" style="font-size:12px;">c) Alimenti da escludere</div>
+      <div class="guide">Inserisci gli alimenti che non vuoi che facciano parte del tuo piano dieta (es. salmone, fagioli, peperoni...)</div>
+      <div class="toolbar">
+        <button class="btn btn-outline btn-sm" onclick="addListItem('alimenti')">+ Aggiungi</button>
+        <label class="checkbox-field" style="font-size:12px;">
+          <input type="checkbox" id="chk-all-ali" onchange="toggleAllList('alimenti', this.checked)"> Seleziona tutto
+        </label>
+        <button class="btn btn-danger-outline btn-sm" onclick="deleteSelectedList('alimenti')">🗑️ Elimina selezionati</button>
+      </div>
+      <div class="table-wrap">
+        <div id="alimenti-list" style="min-height:40px;"></div>
+      </div>
+    </div>
+    
+    <!-- Integratori -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="section-title" style="font-size:12px;">d) Integratori da comprendere</div>
+      <div class="guide">Inserisci gli integratori alimentari che vuoi assumere (es. Proteine Whey, creatina monoidrato, capsule Omega 3...)</div>
+      <div class="toolbar">
+        <button class="btn btn-outline btn-sm" onclick="addListItem('integratori')">+ Aggiungi</button>
+        <label class="checkbox-field" style="font-size:12px;">
+          <input type="checkbox" id="chk-all-int2" onchange="toggleAllList('integratori', this.checked)"> Seleziona tutto
+        </label>
+        <button class="btn btn-danger-outline btn-sm" onclick="deleteSelectedList('integratori')">🗑️ Elimina selezionati</button>
+      </div>
+      <div class="table-wrap">
+        <div id="integratori-list" style="min-height:40px;"></div>
+      </div>
+    </div>
+    
+    <!-- Genera dieta -->
+    <div class="card">
+      <div class="section-title" style="font-size:12px;">Genera il tuo piano dieta con AI</div>
+      <div id="prompt-preview-wrap">
+        <div class="frame-title">Anteprima del prompt che verrà inviato all'AI:</div>
+        <div class="prompt-preview" id="prompt-preview">Seleziona le opzioni sopra per vedere l'anteprima del prompt...</div>
+      </div>
+      <button class="btn btn-ai" onclick="generateDiet()">🤖 Genera piano dieta con AI</button>
+      <div id="diet-loading" class="loading hidden"><div class="spinner"></div> L'AI sta elaborando il tuo piano dieta personalizzato...</div>
+      <div id="diet-output" class="hidden"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== STATS TAB ========== -->
+<div id="page-stats" class="hidden">
+  <div class="section">
+    <div class="section-title">📈 Statistiche e Andamento</div>
+    
+    <div class="stats-grid" id="stats-summary" style="margin-bottom:20px;"></div>
+    
+    <div class="card" style="margin-bottom:16px;">
+      <div class="frame-title">Andamento peso nel tempo (kg)</div>
+      <div class="chart-container">
+        <canvas id="chart-peso" role="img" aria-label="Grafico andamento peso nel tempo">Dati peso nel tempo</canvas>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="frame-title">Andamento % massa grassa nel tempo</div>
+      <div class="chart-container">
+        <canvas id="chart-grassa" role="img" aria-label="Grafico andamento massa grassa nel tempo">Dati massa grassa nel tempo</canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ====== STATE ======
+let state = {
+  config: { dob:'', sesso:'', altezza:'' },
+  measures: {},
+  intolleranze: [],
+  alimenti: [],
+  integratori: []
+};
+
+// ====== LOOKUP TABLES ======
+const CLASSIFICAZIONE = {
+  M: [{soglia:5,cl:'Pericolo per la salute'},{soglia:14,cl:'Forma atletica'},{soglia:18,cl:'Buono stato di forma'},{soglia:26,cl:'Obesità lieve'},{soglia:200,cl:'Obesità'}],
+  F: [{soglia:13,cl:'Pericolo per la salute'},{soglia:21,cl:'Forma atletica'},{soglia:25,cl:'Buono stato di forma'},{soglia:32,cl:'Obesità lieve'},{soglia:200,cl:'Obesità'}]
+};
+
+// ====== INIT ======
+window.onload = function() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('m-data').value = today;
+  document.getElementById('m-data').max = today;
+  const dobField = document.getElementById('cfg-dob');
+  dobField.max = today;
+  loadState();
+  renderAll();
+  buildPromptPreview();
+};
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('nutrimonitor');
+    if (s) state = JSON.parse(s);
+  } catch(e) {}
+}
+
+function saveState() {
+  try { localStorage.setItem('nutrimonitor', JSON.stringify(state)); } catch(e) {}
+}
+
+// ====== TABS ======
+let configComplete = false;
+
+function showTab(tab) {
+  if (!configComplete && tab !== 'config') return;
+  ['config','monitor','diet','stats'].forEach(t => {
+    document.getElementById('page-'+t).classList.toggle('hidden', t !== tab);
+    document.getElementById('tab-'+t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'stats') renderStats();
+  if (tab === 'diet') buildPromptPreview();
+}
+
+function unlockTabs() {
+  ['monitor','diet','stats'].forEach(t => {
+    const el = document.getElementById('tab-'+t);
+    el.classList.remove('disabled');
+    el.onclick = () => showTab(t);
+  });
+}
+
+// ====== CONFIG ======
+function saveConfig() {
+  state.config.dob = document.getElementById('cfg-dob').value;
+  state.config.sesso = document.getElementById('cfg-sesso').value;
+  state.config.altezza = document.getElementById('cfg-altezza').value;
+  saveState();
+  checkConfigComplete();
+}
+
+function saveConfigExplicit() {
+  saveConfig();
+  const complete = checkConfigComplete();
+  document.getElementById('cfg-save-msg').classList.toggle('hidden', !complete);
+  document.getElementById('cfg-incomplete-msg').classList.toggle('hidden', complete);
+  if (complete) setTimeout(() => document.getElementById('cfg-save-msg').classList.add('hidden'), 3000);
+}
+
+function checkConfigComplete() {
+  const {dob, sesso, altezza} = state.config;
+  const ok = dob && sesso && altezza && parseInt(altezza) >= 100 && parseInt(altezza) <= 250;
+  configComplete = !!ok;
+  if (ok) unlockTabs();
+  return !!ok;
+}
+
+// ====== CALCULATIONS ======
+function calcAge(dateStr, refDateStr) {
+  const dob = new Date(dateStr);
+  const ref = new Date(refDateStr);
+  return ref.getFullYear() - dob.getFullYear();
+}
+
+function calcBMR(peso, altezza, age, sesso) {
+  if (sesso === 'M') return 66 + (13.7 * peso) + (5 * altezza) - (6.8 * age);
+  return 655 + (9.6 * peso) + (1.7 * altezza) - (4.7 * age);
+}
+
+function calcBodyFat(sesso, vita, collo, fianchi, altezza) {
+  if (sesso === 'M') {
+    const logDiff = Math.log10(vita - collo);
+    const logH = Math.log10(altezza);
+    return 495 / (1.0324 - 0.19077 * logDiff + 0.15456 * logH) - 450;
+  } else {
+    const logSum = Math.log10(vita + fianchi - collo);
+    const logH = Math.log10(altezza);
+    return 495 / (1.29579 - 0.35004 * logSum + 0.22100 * logH) - 450;
+  }
+}
+
+function classifyBodyFat(pct, sesso) {
+  const rows = CLASSIFICAZIONE[sesso] || CLASSIFICAZIONE['M'];
+  for (const row of rows) {
+    if (pct < row.soglia) return row.cl;
+  }
+  return rows[rows.length-1].cl;
+}
+
+function badgeClass(cl) {
+  if (cl === 'Forma atletica') return 'badge-atletica';
+  if (cl === 'Buono stato di forma') return 'badge-buono';
+  if (cl === 'Obesità lieve' || cl === 'Obesità') return 'badge-obesita';
+  if (cl === 'Pericolo per la salute') return 'badge-pericolo';
+  return 'badge-normal';
+}
+
+function computeMeasure(m, cfg) {
+  const peso = parseFloat(m.peso);
+  const altezza = parseFloat(cfg.altezza);
+  const age = calcAge(cfg.dob, m.data);
+  const sesso = cfg.sesso;
+  const vita = parseFloat(m.vita);
+  const collo = parseFloat(m.collo);
+  const fianchi = parseFloat(m.fianchi);
+  const lavoro = parseFloat(m.lavoro);
+  const ore = parseFloat(m.ore);
+
+  let result = {};
+  
+  const hasMandatory = m.data && collo && vita && fianchi && peso && m.lavoro && m.ore;
+  if (!hasMandatory || isNaN(peso) || isNaN(vita) || isNaN(collo) || isNaN(fianchi)) return result;
+
+  const bmr = calcBMR(peso, altezza, age, sesso);
+  result.bmr = bmr;
+  result.termogenesi = bmr * 0.1;
+  result.metLavorativo = bmr * lavoro;
+  result.incrementoAF = bmr / 100 * ore;
+  result.fabbisogno = result.termogenesi + result.metLavorativo + result.incrementoAF;
+  
+  if (!isNaN(vita) && !isNaN(collo) && vita > collo) {
+    const pf = calcBodyFat(sesso, vita, collo, fianchi, altezza);
+    if (!isNaN(pf) && pf > 0 && pf < 100) {
+      result.pctGrassa = pf;
+      result.pctMagra = 100 - pf;
+      result.classificazione = classifyBodyFat(pf, sesso);
+    }
+  }
+
+  if (m.regime !== undefined && m.regime !== '') {
+    const r = parseFloat(m.regime);
+    result.regime = r;
+    result.calorie = result.fabbisogno + result.fabbisogno * r;
+  }
+
+  return result;
+}
+
+// ====== MEASURE FORM ======
+function updateSummary() {
+  const cfg = state.config;
+  const m = {
+    data: document.getElementById('m-data').value,
+    collo: document.getElementById('m-collo').value,
+    vita: document.getElementById('m-vita').value,
+    fianchi: document.getElementById('m-fianchi').value,
+    peso: document.getElementById('m-peso').value,
+    lavoro: document.getElementById('m-lavoro').value,
+    ore: document.getElementById('m-ore').value,
+    regime: document.getElementById('m-regime').value
+  };
+  
+  const res = computeMeasure(m, cfg);
+  const summaryEl = document.getElementById('summary-result');
+  const regimeSection = document.getElementById('regime-section');
+  const calResult = document.getElementById('calories-result');
+
+  if (res.fabbisogno) {
+    regimeSection.style.display = '';
+    let html = '';
+    if (res.pctGrassa !== undefined) {
+      html += `<div style="margin-bottom:10px;" class="big-text">
+        <strong>Percentuale di massa grassa: ${Math.round(res.pctGrassa)}%</strong> &nbsp;
+        <span class="badge ${badgeClass(res.classificazione)}">${res.classificazione}</span>
+        &nbsp; | Massa magra: ${Math.round(res.pctMagra)}%
+      </div>`;
+    }
+    html += `<div class="big-text">Il tuo fabbisogno calorico è <strong>${Math.round(res.fabbisogno)} kcal</strong></div>`;
+    html += `<div class="text-muted mt-2">Metabolismo basale: ${Math.round(res.bmr)} · Termogenesi: ${Math.round(res.termogenesi)} · Metabolismo lavorativo: ${Math.round(res.metLavorativo)}</div>`;
+    summaryEl.innerHTML = html;
+    
+    if (m.regime !== '' && res.calorie !== undefined) {
+      const labels = {
+        '0.05':'surplus minimo (+5%)','0.10':'surplus medio (+10%)','0.20':'surplus massimo (+20%)',
+        '0':'nel fabbisogno calorico','-0.05':'deficit minimo (-5%)','-0.10':'deficit medio (-10%)','-0.25':'deficit massimo (-25%)'
+      };
+      const rl = labels[m.regime] || m.regime;
+      calResult.innerHTML = `<div class="summary-card"><span class="big-text">Seguendo un regime di <strong>${rl}</strong>, dovrai assumere <strong style="color:var(--primary); font-size:20px;">${Math.round(res.calorie)} kcal</strong> giornaliere.</span></div>`;
+    } else {
+      calResult.innerHTML = '';
+    }
+  } else {
+    summaryEl.innerHTML = '<div class="text-muted">Compilare tutti i dati obbligatori per visualizzare il riepilogo.</div>';
+    regimeSection.style.display = 'none';
+    calResult.innerHTML = '';
+  }
+}
+
+document.addEventListener('input', function(e) {
+  const monitorInputs = ['m-collo','m-vita','m-fianchi','m-peso','m-lavoro','m-ore','m-regime','m-petto','m-braccio','m-avambraccio','m-coscia','m-polpaccio','m-fc'];
+  if (monitorInputs.includes(e.target.id)) updateSummary();
+  if (['d-pasti','d-sgarro','d-spuntino','macro-carbo','macro-prot','macro-grassi'].includes(e.target.id)) buildPromptPreview();
+});
+document.addEventListener('change', function(e) {
+  const ids = ['m-lavoro','m-ore','m-regime','d-sgarro'];
+  if (ids.includes(e.target.id)) { updateSummary(); buildPromptPreview(); }
+});
+
+function loadMeasureForDate() {
+  const data = document.getElementById('m-data').value;
+  if (!data) return;
+  const m = state.measures[data];
+  if (m) {
+    ['collo','petto','vita','fianchi','braccio','avambraccio','coscia','polpaccio','peso','fc'].forEach(f => {
+      const el = document.getElementById('m-'+f);
+      if (el) el.value = m[f] || '';
+    });
+    document.getElementById('m-lavoro').value = m.lavoro || '';
+    document.getElementById('m-ore').value = m.ore || '';
+    document.getElementById('m-regime').value = m.regime || '';
+  } else {
+    clearMeasureForm(false);
+  }
+  updateSummary();
+}
+
+function clearMeasureForm(clearDate = true) {
+  if (clearDate) {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('m-data').value = today;
+  }
+  ['collo','petto','vita','fianchi','braccio','avambraccio','coscia','polpaccio','peso','fc'].forEach(f => {
+    const el = document.getElementById('m-'+f);
+    if (el) el.value = '';
+  });
+  document.getElementById('m-lavoro').value = '';
+  document.getElementById('m-ore').value = '';
+  document.getElementById('m-regime').value = '';
+  document.getElementById('regime-section').style.display = 'none';
+  updateSummary();
+}
+
+function saveMeasure() {
+  const data = document.getElementById('m-data').value;
+  if (!data) { alert('Inserisci la data di verifica.'); return; }
+  const collo = document.getElementById('m-collo').value;
+  const vita = document.getElementById('m-vita').value;
+  const fianchi = document.getElementById('m-fianchi').value;
+  const peso = document.getElementById('m-peso').value;
+  const lavoro = document.getElementById('m-lavoro').value;
+  const ore = document.getElementById('m-ore').value;
+  if (!collo || !vita || !fianchi || !peso || !lavoro || !ore) {
+    alert('Compila tutti i campi obbligatori (*).');
+    return;
+  }
+  state.measures[data] = {
+    data, collo, petto: document.getElementById('m-petto').value,
+    vita, fianchi, braccio: document.getElementById('m-braccio').value,
+    avambraccio: document.getElementById('m-avambraccio').value,
+    coscia: document.getElementById('m-coscia').value,
+    polpaccio: document.getElementById('m-polpaccio').value,
+    peso, fc: document.getElementById('m-fc').value,
+    lavoro, ore, regime: document.getElementById('m-regime').value
+  };
+  saveState();
+  renderMeasuresList();
+  showToast('Misurazione salvata!');
+}
+
+function renderMeasuresList() {
+  const tbody = document.getElementById('measures-list');
+  const dates = Object.keys(state.measures).sort((a,b) => b.localeCompare(a));
+  if (!dates.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">Nessuna misurazione inserita</td></tr>';
+    return;
+  }
+  tbody.innerHTML = dates.map(d => {
+    const m = state.measures[d];
+    const res = computeMeasure(m, state.config);
+    const pctG = res.pctGrassa !== undefined ? Math.round(res.pctGrassa)+'%' : '—';
+    const pctM = res.pctMagra !== undefined ? Math.round(res.pctMagra)+'%' : '—';
+    const cl = res.classificazione || '';
+    const fabb = res.fabbisogno !== undefined ? Math.round(res.fabbisogno) : '—';
+    return `<tr>
+      <td><input type="checkbox" class="measure-chk" data-date="${d}"></td>
+      <td>${d}</td>
+      <td>${pctG}</td>
+      <td>${pctM}</td>
+      <td>${cl ? `<span class="badge ${badgeClass(cl)}">${cl}</span>` : '—'}</td>
+      <td>${parseFloat(m.peso).toFixed(1)} kg</td>
+      <td>${fabb !== '—' ? fabb+' kcal' : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleAllMeasures(val) {
+  document.querySelectorAll('.measure-chk').forEach(c => c.checked = val);
+}
+
+function deleteSelectedMeasures() {
+  document.querySelectorAll('.measure-chk:checked').forEach(c => {
+    delete state.measures[c.dataset.date];
+  });
+  document.getElementById('chk-all-measures').checked = false;
+  saveState();
+  renderMeasuresList();
+}
+
+// ====== GENERIC LIST ======
+function renderList(name) {
+  const el = document.getElementById(name+'-list');
+  const items = state[name];
+  if (!items.length) {
+    el.innerHTML = '<div style="padding:12px 16px; color:var(--text-muted); font-size:13px;">Nessun elemento inserito</div>';
+    return;
+  }
+  el.innerHTML = items.map((item, i) => `
+    <div class="list-item">
+      <input type="checkbox" class="${name}-chk" data-idx="${i}">
+      <span>${item}</span>
+    </div>`).join('');
+}
+
+function addListItem(name) {
+  const labels = {
+    intolleranze: 'Inserisci intolleranza o allergia (es. glutine, nichel):',
+    alimenti: 'Inserisci alimento da escludere:',
+    integratori: 'Inserisci integratore da includere:'
+  };
+  const val = prompt(labels[name] || 'Inserisci:');
+  if (val && val.trim()) {
+    state[name].push(val.trim());
+    saveState();
+    renderList(name);
+    buildPromptPreview();
+  }
+}
+
+function toggleAllList(name, val) {
+  document.querySelectorAll('.'+name+'-chk').forEach(c => c.checked = val);
+}
+
+function deleteSelectedList(name) {
+  const toDelete = new Set();
+  document.querySelectorAll('.'+name+'-chk:checked').forEach(c => toDelete.add(parseInt(c.dataset.idx)));
+  state[name] = state[name].filter((_, i) => !toDelete.has(i));
+  saveState();
+  renderList(name);
+  buildPromptPreview();
+}
+
+// ====== DIET ======
+function toggleDietType() {
+  const isManual = document.getElementById('dieta-manual').checked;
+  document.getElementById('macro-section').classList.toggle('hidden', !isManual);
+  buildPromptPreview();
+}
+
+function updateMacroBars() {
+  const c = parseInt(document.getElementById('macro-carbo').value) || 0;
+  const p = parseInt(document.getElementById('macro-prot').value) || 0;
+  const g = parseInt(document.getElementById('macro-grassi').value) || 0;
+  document.getElementById('bar-carbo').style.width = Math.min(c,100)+'%';
+  document.getElementById('bar-prot').style.width = Math.min(p,100)+'%';
+  document.getElementById('bar-grassi').style.width = Math.min(g,100)+'%';
+  const ok = (c+p+g === 100);
+  document.getElementById('macro-total-check').classList.toggle('hidden', ok);
+  buildPromptPreview();
+}
+
+function getLastMeasure() {
+  const today = new Date().toISOString().split('T')[0];
+  const dates = Object.keys(state.measures).filter(d => d <= today).sort((a,b) => b.localeCompare(a));
+  if (!dates.length) return null;
+  const m = state.measures[dates[0]];
+  return { m, res: computeMeasure(m, state.config) };
+}
+
+function buildPromptPreview() {
+  const el = document.getElementById('prompt-preview');
+  if (!el) return;
+  
+  const last = getLastMeasure();
+  const isManual = document.getElementById('dieta-manual') && document.getElementById('dieta-manual').checked;
+  const pasti = document.getElementById('d-pasti') ? document.getElementById('d-pasti').value : '';
+  const spuntino = document.getElementById('d-spuntino') && document.getElementById('d-spuntino').checked;
+  const sgarro = document.getElementById('d-sgarro') ? document.getElementById('d-sgarro').value : 'nessuno';
+  
+  let kcal = '???';
+  if (last && last.res.calorie) kcal = Math.round(last.res.calorie);
+  else if (last && last.res.fabbisogno) kcal = Math.round(last.res.fabbisogno);
+
+  let prompt = '';
+  if (isManual) {
+    const carbo = document.getElementById('macro-carbo') ? document.getElementById('macro-carbo').value : 40;
+    const prot = document.getElementById('macro-prot') ? document.getElementById('macro-prot').value : 30;
+    const grassi = document.getElementById('macro-grassi') ? document.getElementById('macro-grassi').value : 30;
+    prompt = `Mi prepari in forma tabellare una dieta settimanale, con tutti i giorni della settimana su una sola tabella, di ${kcal} kcal giornaliere con la seguente suddivisione dei macronutrienti: ${carbo}% di carboidrati, ${prot}% di proteine e ${grassi}% di grassi.`;
+  } else {
+    prompt = `Mi prepari in forma tabellare una dieta settimanale, con tutti i giorni della settimana su una sola tabella, di ${kcal} kcal giornaliere, calibrata in base ai miei parametri fisici.`;
+  }
+  
+  if (state.integratori.length) {
+    prompt += `\nNella dieta devono essere presenti: ${state.integratori.join(', ')}. Indicami esattamente quando assumerli.`;
+  }
+  if (state.intolleranze.length) {
+    prompt += `\nSono intollerante o allergico alle seguenti sostanze o alimenti: ${state.intolleranze.join(', ')}. Pertanto, escludi tutti gli alimenti che contengono le sostanze o alimenti in elenco.`;
+  }
+  if (state.alimenti.length) {
+    prompt += `\nEscludi inoltre i seguenti alimenti: ${state.alimenti.join(', ')}.`;
+  }
+  if (pasti) {
+    prompt += `\nLa dieta deve prevedere n.${pasti} pasti al giorno${spuntino ? ' con l\'aggiunta di uno spuntino serale' : ''}.`;
+  }
+  if (sgarro && sgarro !== 'nessuno') {
+    prompt += `\nIl giorno di sgarro è ${sgarro}.`;
+  }
+  prompt += `\nRiportami le quantità degli alimenti, le calorie che apporta ciascun alimento e le percentuali dei macronutrienti per ogni giorno della settimana e le calorie per ciascun pasto facendo attenzione che ogni giorno mi faccia assumere le calorie previste.\nNella tabella metti la dieta per un giorno tipo, proponendomi tre alternative per ciascun pasto.`;
+  
+  el.textContent = prompt;
+  return prompt;
+}
+
+async function generateDiet() {
+  const pasti = document.getElementById('d-pasti').value;
+  if (!pasti) { alert('Indica il numero di pasti giornalieri.'); return; }
+  
+  const isManual = document.getElementById('dieta-manual').checked;
+  if (isManual) {
+    const c = parseInt(document.getElementById('macro-carbo').value)||0;
+    const p = parseInt(document.getElementById('macro-prot').value)||0;
+    const g = parseInt(document.getElementById('macro-grassi').value)||0;
+    if (c+p+g !== 100) { alert('La somma dei macronutrienti deve essere 100%.'); return; }
+  }
+  
+  const prompt = buildPromptPreview();
+  document.getElementById('diet-loading').classList.remove('hidden');
+  document.getElementById('diet-output').classList.add('hidden');
+  
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: 'Sei un nutrizionista esperto. Rispondi sempre in italiano. Crea piani dieta dettagliati, chiari e in formato tabellare quando richiesto. Sii preciso con le calorie e le percentuali.',
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content && data.content[0] && data.content[0].text ? data.content[0].text : 'Errore nella risposta.';
+    document.getElementById('diet-output').innerHTML = `
+      <div class="alert-success alert mt-3" style="margin-bottom:0;">✅ Piano dieta generato con successo!</div>
+      <div class="diet-output">${escapeHtml(text)}</div>
+      <button class="btn btn-outline btn-sm mt-3" onclick="copyDiet()">📋 Copia testo</button>
+    `;
+    document.getElementById('diet-output').classList.remove('hidden');
+    window._lastDiet = text;
+  } catch(e) {
+    document.getElementById('diet-output').innerHTML = `<div class="alert alert-warning mt-3">⚠️ Errore durante la generazione. Riprova più tardi.<br><small>${e.message}</small></div>`;
+    document.getElementById('diet-output').classList.remove('hidden');
+  }
+  document.getElementById('diet-loading').classList.add('hidden');
+}
+
+function copyDiet() {
+  if (window._lastDiet) {
+    navigator.clipboard.writeText(window._lastDiet).then(() => showToast('Testo copiato!'));
+  }
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+// ====== STATS ======
+let chartPeso = null, chartGrassa = null;
+
+function renderStats() {
+  const dates = Object.keys(state.measures).sort();
+  const summaryEl = document.getElementById('stats-summary');
+  
+  if (!dates.length) {
+    summaryEl.innerHTML = '<div class="stat-card"><p style="color:var(--text-muted); font-size:13px;">Nessuna misurazione disponibile</p></div>';
+    return;
+  }
+  
+  const last = getLastMeasure();
+  const firstDate = dates[0];
+  const lastDate = dates[dates.length-1];
+  const firstM = state.measures[firstDate];
+  const lastM = state.measures[lastDate];
+  const deltaKg = parseFloat(lastM.peso) - parseFloat(firstM.peso);
+  
+  let cards = `
+    <div class="stat-card"><div class="stat-card-value">${dates.length}</div><div class="stat-card-label">Misurazioni totali</div></div>
+    <div class="stat-card"><div class="stat-card-value">${parseFloat(lastM.peso).toFixed(1)} kg</div><div class="stat-card-label">Peso attuale</div></div>
+  `;
+  if (last && last.res.pctGrassa !== undefined) {
+    cards += `<div class="stat-card"><div class="stat-card-value">${Math.round(last.res.pctGrassa)}%</div><div class="stat-card-label">Massa grassa attuale</div></div>`;
+    cards += `<div class="stat-card"><div class="stat-card-value"><span class="badge ${badgeClass(last.res.classificazione)}">${last.res.classificazione}</span></div><div class="stat-card-label">Classificazione</div></div>`;
+  }
+  if (dates.length > 1) {
+    const sign = deltaKg >= 0 ? '+' : '';
+    cards += `<div class="stat-card"><div class="stat-card-value" style="color:${deltaKg>0?'var(--warning)':'var(--primary)'}">${sign}${deltaKg.toFixed(1)} kg</div><div class="stat-card-label">Variazione peso</div></div>`;
+  }
+  if (last && last.res.fabbisogno) {
+    cards += `<div class="stat-card"><div class="stat-card-value">${Math.round(last.res.fabbisogno)}</div><div class="stat-card-label">Fabbisogno kcal</div></div>`;
+  }
+  summaryEl.innerHTML = cards;
+  
+  // Charts
+  const labels = dates.map(d => d.slice(5));
+  const pesoData = dates.map(d => parseFloat(state.measures[d].peso));
+  const grassaData = dates.map(d => {
+    const r = computeMeasure(state.measures[d], state.config);
+    return r.pctGrassa !== undefined ? Math.round(r.pctGrassa*10)/10 : null;
+  });
+  
+  if (chartPeso) chartPeso.destroy();
+  chartPeso = new Chart(document.getElementById('chart-peso'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{ label: 'Peso (kg)', data: pesoData, borderColor: '#2D6A4F', backgroundColor: 'rgba(45,106,79,0.08)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#2D6A4F' }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#E8EFE8' } } } }
+  });
+  
+  if (chartGrassa) chartGrassa.destroy();
+  const validGrassa = grassaData.some(v => v !== null);
+  if (validGrassa) {
+    chartGrassa = new Chart(document.getElementById('chart-grassa'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{ label: '% Massa grassa', data: grassaData, borderColor: '#E67E22', backgroundColor: 'rgba(230,126,34,0.08)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#E67E22' }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#E8EFE8' }, ticks: { callback: v => v+'%' } } } }
+    });
+  }
+}
+
+// ====== TOAST ======
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style, { position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)', background:'var(--primary)', color:'white', padding:'10px 20px', borderRadius:'8px', fontSize:'13px', zIndex:'9999', boxShadow:'0 4px 12px rgba(0,0,0,0.2)', pointerEvents:'none' });
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// ====== RENDER ALL ======
+function renderAll() {
+  // Load config
+  document.getElementById('cfg-dob').value = state.config.dob || '';
+  document.getElementById('cfg-sesso').value = state.config.sesso || '';
+  document.getElementById('cfg-altezza').value = state.config.altezza || '';
+  checkConfigComplete();
+  renderMeasuresList();
+  renderList('intolleranze');
+  renderList('alimenti');
+  renderList('integratori');
+}
+</script>
+</body>
+</html>
