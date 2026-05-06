@@ -2,66 +2,65 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini API Test</title>
+    <title>Diagnosi Modelli Gemini</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        #output { margin-top: 20px; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap; }
+        body { font-family: 'Segoe UI', sans-serif; padding: 30px; background-color: #f0f4f8; }
+        .container { max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 12px; shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        input, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
+        button { background-color: #1a73e8; color: white; font-weight: bold; cursor: pointer; border: none; }
+        button:hover { background-color: #1557b0; }
+        #log { margin-top: 20px; padding: 15px; background: #202124; color: #34a853; border-radius: 6px; font-family: monospace; white-space: pre-wrap; overflow-x: auto; min-height: 100px; }
+        .error { color: #ea4335 !important; }
     </style>
 </head>
 <body>
-    <h1>Chatta con Gemini</h1>
-    <input type="text" id="prompt" placeholder="Chiedi qualcosa..." size="50">
 
+<div class="container">
+    <h2>Analisi Professionale Permessi API</h2>
+    <p>Inserisci la chiave <b>...</b> per verificare quali modelli sono realmente attivi per te.</p>
 
-    <input type="text" id="myApiKey" placeholder="inserisci API Key" size="50">
-    <button onclick="chiediAGemini()">Invia</button>
+    <input type="password" id="apiKey" placeholder="Incolla qui la chiave API">
+    <button onclick="eseguiDiagnosi()">Avvia Analisi Modelli</button>
 
-    <div id="output">La risposta apparirà qui...</div>
+    <div id="log">I risultati appariranno qui dopo l'analisi...</div>
+</div>
 
-    <script>
-        async function chiediAGemini() {
-            const apiKey = document.getElementById("myApiKey").value
-            alert("apiKey:" + apiKey)
-        
-            //https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=API_KEY
-            const prompt = document.getElementById("prompt").value;
-            const outputDiv = document.getElementById("output");
+<script>
+async function eseguiDiagnosi() {
+    const key = document.getElementById('apiKey').value.trim();
+    const log = document.getElementById('log');
 
-            outputDiv.innerText = "Caricamento...";
+    if(!key) { alert("Inserisci la chiave!"); return; }
 
-            // URL per il modello Gemini 1.5 Flash (veloce ed economico)
-            //const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-              const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
-            const data = {
-                contents: [{
-                    parts: [{ text: prompt }]
-                }]
-            };
+    log.innerText = "Interrogazione server Google in corso...\n";
+    log.classList.remove("error");
 
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data)
-                });
+    const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`;
 
-                const result = await response.json();
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
 
-                // Estrai il testo dalla risposta JSON complessa
-                
-                if (!result.candidates) {
-                  outputDiv.innerText = "Errore API: " + JSON.stringify(result, null, 2);
-                  return;
-                }
-
-                const text = result.candidates[0].content.parts[0].text;
-                outputDiv.innerText = text;
-            } catch (error) {
-                outputDiv.innerText = "Errore: " + error.message;
-            }
+        if (!response.ok) {
+            log.classList.add("error");
+            log.innerText = "ERRORE SERVER (" + response.status + "):\n" + JSON.stringify(data, null, 2);
+            return;
         }
-    </script>
+
+        if (data.models && data.models.length > 0) {
+            let modelliLista = data.models.map(m => "- " + m.name.replace('models/', '')).join('\n');
+            log.innerText = "SUCCESSO! Modelli trovati per la tua chiave:\n\n" + modelliLista;
+        } else {
+            log.classList.add("error");
+            log.innerText = "ATTENZIONE: La chiave è valida ma non ha modelli associati.\nRisposta completa:\n" + JSON.stringify(data, null, 2);
+        }
+    } catch (e) {
+        log.classList.add("error");
+        log.innerText = "ERRORE DI RETE:\n" + e.message;
+    }
+}
+</script>
+
 </body>
 </html>
  
