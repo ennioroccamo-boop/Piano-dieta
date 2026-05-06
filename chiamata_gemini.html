@@ -12,13 +12,17 @@
 <body>
     <h1>Chatta con Gemini</h1>
     <input type="text" id="prompt" placeholder="Chiedi qualcosa..." size="50">
+
+
+    <input type="text" id="myApiKey" placeholder="inserisci API Key" size="50">
     <button onclick="chiediAGemini()">Invia</button>
 
     <div id="output">La risposta apparirà qui...</div>
 
     <script>
         async function chiediAGemini() {
-            const apiKey = "AIzaSyBeIUpTS0fnINnTzln_ilxxL1qPrHudScw";
+            const apiKey = document.getElementById("myApiKey").value
+        
             //https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=API_KEY
             const prompt = document.getElementById("prompt").value;
             const outputDiv = document.getElementById("output");
