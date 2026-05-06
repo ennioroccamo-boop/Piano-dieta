@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini API Test</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        #output { margin-top: 20px; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>Chatta con Gemini</h1>
+    <input type="text" id="prompt" placeholder="Chiedi qualcosa..." size="50">
+    <button onclick="chiediAGemini()">Invia</button>
+
+    <div id="output">La risposta apparirà qui...</div>
+
+    <script>
+        async function chiediAGemini() {
+            const apiKey = "AIzaSyBeIUpTS0fnINnTzln_ilxxL1qPrHudScw";
+            const prompt = document.getElementById("prompt").value;
+            const outputDiv = document.getElementById("output");
+
+            outputDiv.innerText = "Caricamento...";
+
+            // URL per il modello Gemini 1.5 Flash (veloce ed economico)
+            const url = `https://googleapis.com{apiKey}`;
+
+            const data = {
+                contents: [{
+                    parts: [{ text: prompt }]
+                }]
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                // Estrai il testo dalla risposta JSON complessa
+                const text = result.candidates[0].content.parts[0].text;
+                outputDiv.innerText = text;
+            } catch (error) {
+                outputDiv.innerText = "Errore: " + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
+ 
